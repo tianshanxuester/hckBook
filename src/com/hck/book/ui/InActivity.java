@@ -11,7 +11,6 @@ import java.util.Set;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -51,16 +50,16 @@ import com.wxd.bookreader.manager.BookManager;
  */
 public class InActivity extends DefaultActivity implements OnClickListener {
 	protected static final String TAG = "InActivity";
-	protected ListView lv;
-	protected TextView tt, tv1;
-	protected ImageView im, imChoose;
+	protected ListView lvImportBookList;
+	protected TextView tt ;
+	protected ImageView im ;
 	protected String name[];
 	protected String path[];
 	protected int num[];
 	protected ArrayList<String> list;
 	protected Set<String> set;
 	protected Map<String, Integer> parentmap;
-	protected Map<String, Integer> mapIn;
+	protected Map<String, Integer> filesToImport;
 	protected ArrayList<Map<String, Object>> aList;
 	protected int a;
 	protected int i;
@@ -75,9 +74,8 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 	private HashMap<String, ArrayList<BookVo>> importedBooks;
 	protected Boolean ok = false;
 	protected ProgressDialog mpDialog = null;
-	private ArrayList<BookInfo> insertList = new ArrayList<BookInfo>();
-	protected ArrayList<Integer> intList;
-	protected Context context;
+	private ArrayList<BookInfo> insertList = new ArrayList<BookInfo>();	
+	
 	protected AlertDialog ab;
 	private BookManager bookManager = new BookManager();
 	
@@ -117,7 +115,7 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 		public void handleMessage(Message msg) {
 			if (msg.what == 1) {
 				insert();
-				importedBooks = select();
+				importedBooks = bookManager.getImportedBooksGroupByFolder();
 				show("a");
 				mpDialog.dismiss();
 			} else if (msg.what == 2) {
@@ -173,7 +171,7 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 			name = new String[importedBookSet.size()];
 			paths = new ArrayList<String>();
 			i = 0;
-			mapIn.clear();
+			filesToImport.clear();
 			Iterator<String> it = importedBookSet.iterator();
 			while (it.hasNext()) {
 				a = 0;
@@ -240,38 +238,37 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 				0, 0);
 		aaaa = (Button) popunwindwow.findViewById(R.id.aaaa);// 确认导入按钮
 		aaaa.setBackgroundResource(R.drawable.popin);
-		aaaa.setText("确认导入(" + String.valueOf(mapIn.size()) + ")");
+		aaaa.setText("确认导入(" + String.valueOf(filesToImport.size()) + ")");
 		aaaa.setOnClickListener(this);
 	}
 
 	public void setDate(int a) {
 		Log.i("hck", "setDate");
 		FileDapter	aDapter=new FileDapter(this, aList,a);
-		lv.setAdapter(aDapter);
+		lvImportBookList.setAdapter(aDapter);
 		Log.i("hck", "adpter");
 	}
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);		
-		setContentView(R.layout.in);
-		
-		tv1 = (TextView) findViewById(R.id.name2);
-		lv = (ListView) findViewById(R.id.ListView02);
-		context = this;
-		imChoose = (ImageView) findViewById(R.id.imChoose);
+		setContentView(R.layout.import_books);
+			
+		lvImportBookList = (ListView) findViewById(R.id.lv_import_book_list);	
 		all = (TextView) findViewById(R.id.all);
 		all.setVisibility(View.GONE);
+		
 		localbook = new BookDB(this);
 		
 		popunwindwow = this.getLayoutInflater().inflate(R.layout.popwindow,	null);
 		mPopupWindow = new PopupWindow(popunwindwow, LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT);
-		mapIn = new HashMap<String, Integer>();// 记录点击准备导入的文件
+	
+		filesToImport = new HashMap<String, Integer>();// 记录点击准备导入的文件
 		parentmap = new HashMap<String, Integer>();
 		set = new HashSet<String>();
 		list = new ArrayList<String>();
 		// 遍历数据库lackbook 如果数据库为空开启线程 遍历SD卡 否则直接从数据库中提取显示
-		if (select().isEmpty()) {			
+		if (bookManager.getImportedBooksGroupByFolder().isEmpty()) {			
 			// 导入文件
 			LogUtil.debug("准备导入文件！");
 			showProgressDialog("请稍后......");
@@ -285,7 +282,7 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 		
 		
 		// 处理导入文件时listview内的点击事件
-		lv.setOnItemClickListener(new OnItemClickListener() {
+		lvImportBookList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position,long arg3) {
 				String p = paths.get(position);
@@ -300,29 +297,29 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 					String s = file.getParent();
 					if (file.isFile()) {
 						if (importedBooks.get(s).get(position - 1).getLocal() == 0) {
-							if (!mapIn.containsKey(p)) {
+							if (!filesToImport.containsKey(p)) {
 								Map<String, Object> map1 = aList.get(position);
 								map1.put("imChoose", Image[0]);
 								setDate(2);
-								mapIn.put(p, position);
+								filesToImport.put(p, position);
 								if (!mPopupWindow.isShowing()) {
 									pop();
 									aaaa.setText("确认导入("
-											+ String.valueOf(mapIn.size())
+											+ String.valueOf(filesToImport.size())
 											+ ")");
 								}
 								aaaa.setText("确认导入("
-										+ String.valueOf(mapIn.size()) + ")");
+										+ String.valueOf(filesToImport.size()) + ")");
 							} else {
 								Map<String, Object> map1 = aList.get(position);
 								map1.put("imChoose", Image[1]);
 								setDate(2);
-								mapIn.remove(p);
-								if (mapIn.isEmpty()) {
+								filesToImport.remove(p);
+								if (filesToImport.isEmpty()) {
 									mPopupWindow.dismiss();
 								}
 								aaaa.setText("确认导入("
-										+ String.valueOf(mapIn.size()) + ")");
+										+ String.valueOf(filesToImport.size()) + ")");
 							}
 						}
 					} else {
@@ -344,19 +341,19 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 						if (file.isFile()) {
 							if (importedBooks.get(s).get(i - 1).getLocal() == 0) {
 
-								if (!mapIn.containsKey(paths.get(i))) {
+								if (!filesToImport.containsKey(paths.get(i))) {
 									Map<String, Object> map1 = aList.get(i);
 									map1.put("imChoose", Image[0]);
 									setDate(2);
-									mapIn.put(paths.get(i), i);
+									filesToImport.put(paths.get(i), i);
 									if (!mPopupWindow.isShowing()) {
 										pop();
 										aaaa.setText("确认导入("
-												+ String.valueOf(mapIn.size())
+												+ String.valueOf(filesToImport.size())
 												+ ")");
 									}
 									aaaa.setText("确认导入("
-											+ String.valueOf(mapIn.size())
+											+ String.valueOf(filesToImport.size())
 											+ ")");
 								}
 							}
@@ -371,24 +368,24 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 						String s = file.getParent();
 						if (file.isFile()) {
 							if (importedBooks.get(s).get(i - 1).getLocal() == 0) {
-								if (mapIn.containsKey(paths.get(i))) {
+								if (filesToImport.containsKey(paths.get(i))) {
 									Map<String, Object> map1 = aList.get(i);
 									map1.put("imChoose", Image[1]);
-									mapIn.remove(paths.get(i));
+									filesToImport.remove(paths.get(i));
 								} else {
 									Map<String, Object> map1 = aList.get(i);
 									map1.put("imChoose", Image[0]);
-									mapIn.put(paths.get(i), i);
+									filesToImport.put(paths.get(i), i);
 								}
 							}
 						}
 					}
 					setDate(2);
-					if (mapIn.isEmpty()) {
+					if (filesToImport.isEmpty()) {
 						mPopupWindow.dismiss();
 					}
 					if (aaaa!=null) {
-						aaaa.setText("确认导入(" + String.valueOf(mapIn.size()) + ")");
+						aaaa.setText("确认导入(" + String.valueOf(filesToImport.size()) + ")");
 					}
 					all.setText("全选");
 					b = true;
@@ -437,9 +434,8 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 		
 		db.close();
 		insert();
-		importedBooks = select();
-		show("a");
-		
+		importedBooks = bookManager.getImportedBooksGroupByFolder();
+		show("a");		
 		try {
 			mpDialog.dismiss();
 		} catch (Exception e) {
@@ -453,15 +449,15 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 		// 导入按钮
 		case R.id.aaaa:
 			SQLiteDatabase db = localbook.getWritableDatabase();
-			Set<String> setIn = mapIn.keySet();
+			Set<String> setIn = filesToImport.keySet();
 			Iterator<?> it = setIn.iterator();
 			while (it.hasNext()) {
 				try {
-					String s = (String) it.next();
-					File f = new File(s);
-					String s1 = f.getParent();
-					importedBooks.get(s1).get(mapIn.get(s) - 1).setLocal(1);// 设置导入状态
-					Map<String, Object> map = aList.get(mapIn.get(s));
+					String path = (String) it.next();
+					File f = new File(path);
+					String parentFolder = f.getParent();
+					importedBooks.get(parentFolder).get(filesToImport.get(path) - 1).setLocal(1);// 设置导入状态
+					Map<String, Object> map = aList.get(filesToImport.get(path));
 					map.remove("imChoose");
 					map.put("imChoosezz", "已导入");
 					setDate(2);
@@ -469,7 +465,7 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 					values.put("type", 1);// key为字段名，value为值
 					Cursor cur = db.query(FinalDate.DATABASE_TABKE, new String[]{"path"}, "type=2", null, null, null, null);
 					Log.i("hck","InActivity11: "+cur.getCount());
-					db.update(FinalDate.DATABASE_TABKE, values, "path=?", new String[] { s });// 修改状态为图书被已被导入
+					db.update(FinalDate.DATABASE_TABKE, values, "path=?", new String[] { path });// 修改状态为图书被已被导入
 					
 					//db.insert(FinalDate.DATABASE_TABKE, "path", values);// 修改状态为图书被已被导入
 				} catch (SQLException e) {
@@ -483,42 +479,7 @@ public class InActivity extends DefaultActivity implements OnClickListener {
 			break;
 		}
 	}
-	/**
-	 * 遍历数据库 将数据存入map1，取出的结果是按照父路径进行分组的，其中父路径为key，value为父亲路径下的书籍
-	 * 
-	 */
-	public HashMap<String, ArrayList<BookVo>> select() {
-		SQLiteDatabase db = localbook.getReadableDatabase();
-		String col[] = {"parent"};
-		//取出所有用户导入的书籍的父路径
-		Cursor cur = db.queryWithFactory(null, true, FinalDate.DATABASE_TABKE, col,	"type<>2", null, null, null, null, null);
-		ArrayList<String> arraylist1 = new ArrayList<String>();
-
-		HashMap<String, ArrayList<BookVo>> map1 = new HashMap<String, ArrayList<BookVo>>();
-		while (cur.moveToNext()) {
-			String s1 = cur.getString(cur.getColumnIndex("parent"));
-			arraylist1.add(s1);
-		}		
-		
-		LogUtil.debug("导入书籍的父路径集合："+arraylist1);
-		
-		//取出父路径下面所有的书籍
-		String col1[] = { "path", "type" };
-		for (int i = 0; i < arraylist1.size(); i++) {
-			ArrayList<BookVo> arraylist2 = new ArrayList<BookVo>();
-			Cursor cur1 = db.query(FinalDate.DATABASE_TABKE, col1,"parent = '" + arraylist1.get(i) + "'", null, null, null,null);
-			while (cur1.moveToNext()) {
-				String s2 = cur1.getString(cur1.getColumnIndex("path"));
-				int s3 = cur1.getInt(cur1.getColumnIndex("type"));
-				BookVo bookvo = new BookVo(s2, s3);
-				arraylist2.add(bookvo);
-				map1.put(arraylist1.get(i), arraylist2);
-			}
-		}
-		db.close();
-		cur.close();
-		return map1;
-	}
+	
 
 	/**
 	 * 重写回退按钮 让页面回退到本地书库

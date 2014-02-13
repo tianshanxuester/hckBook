@@ -112,7 +112,6 @@ public final class R {
         public static final int upback=0x7f020055;
     }
     public static final class id {
-        public static final int ListView02=0x7f0b0010;
         public static final int RelativeLayout_Item=0x7f0b001e;
         public static final int ScrollView=0x7f0b0059;
         public static final int aaaa=0x7f0b002b;
@@ -154,6 +153,7 @@ public final class R {
         public static final int item_text=0x7f0b0020;
         public static final int loding2=0x7f0b0022;
         public static final int loding_im=0x7f0b0021;
+        public static final int lv_import_book_list=0x7f0b0010;
         public static final int main11=0x7f0b000d;
         public static final int markEdit4=0x7f0b0036;
         public static final int markImage1=0x7f0b001a;
@@ -216,7 +216,7 @@ public final class R {
         public static final int bookpop=0x7f030000;
         public static final int d=0x7f030001;
         public static final int head=0x7f030002;
-        public static final int in=0x7f030003;
+        public static final int import_books=0x7f030003;
         public static final int item1=0x7f030004;
         public static final int item_import=0x7f030005;
         public static final int item_mark=0x7f030006;
