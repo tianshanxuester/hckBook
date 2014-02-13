@@ -6,7 +6,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.hck.book.helper.BookDB;
-import com.hck.date.FinalDate;
 
 public class MyApplication extends Application {
 	

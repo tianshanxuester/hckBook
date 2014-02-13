@@ -4,17 +4,12 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.database.SQLException;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.hck.book.vo.BookInfo;
@@ -24,12 +19,10 @@ import com.wxd.bookreader.manager.BookManager;
 
 public class LodingActivity extends DefaultActivity {
 
-	private ImageView imageView;	
 	private SharedPreferences sp;
 	private Editor editor;	
 	
-	BookManager bookManager = new BookManager();
-	
+	BookManager bookManager = new BookManager();	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,76 +46,51 @@ public class LodingActivity extends DefaultActivity {
 		}
 		else {
 			FinalDate.isFirst=false;
-		}
+		}		
 		
-		
-		setContentView(R.layout.loding);
-		imageView = (ImageView) findViewById(R.id.loding_im);	 
-		
+		setContentView(R.layout.loding);		
 		new AsyncSetApprove().execute();
-	}
-	
+	}	
  
 	class AsyncSetApprove extends AsyncTask<String, Integer, String> {
 		@Override
 		protected String doInBackground(String... params) {
+			
+			//删除内部图书
+			bookManager.deleteInnerBook();
+			
 			File path = getFilesDir();
 		
-			String[] strings = getResources().getStringArray(R.array.bookid);// 获取assets目录下的文件列表
+			//将应用程序自带的txt电子书复制到手机本地目录中
+			String[] strings = getResources().getStringArray(R.array.bookid);
 			for (int i = 0; i < strings.length; i++) {
 				try {
-					FileOutputStream out = new FileOutputStream(path + "/"+ strings[i]);
+					File file = new File(path + "/"+ strings[i]);
+					FileOutputStream out = new FileOutputStream(file);
 					BufferedInputStream bufferedIn = new BufferedInputStream(getResources().openRawResource(R.raw.book0 + i));
 					BufferedOutputStream bufferedOut = new BufferedOutputStream(out);
 					byte[] data = new byte[2048];
 					int length = 0;
 					while ((length = bufferedIn.read(data)) != -1) {
 						bufferedOut.write(data, 0, length);
-					}
-					// 将缓冲区中的数据全部写出
-					bufferedOut.flush();
+					}				
 					// 关闭流
 					bufferedIn.close();
-					bufferedOut.close();
+					bufferedOut.close();					
+					
+					//将书籍信息放入到数据库中					
+					BookInfo book = new BookInfo();
+					book.parent = file.getParent();
+					book.path = file.toString();
+					book.type = BookInfo.BOOK_TYPE_INNER;
+					book.now = "0";					
+					bookManager.insertBook(book);
 					
 					sp.edit().putBoolean("isInit", true).commit();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}
-
-			ArrayList<HashMap<String, String>> insertList = new ArrayList<HashMap<String, String>>();
-			File[] f1 = path.listFiles();
-			int len = f1.length;
-			for (int i = 0; i < len; i++) {
-				if (f1[i].isFile()) {
-					if (f1[i].toString().contains(".txt")) {
-						HashMap<String, String> insertMap = new HashMap<String, String>();
-						insertMap.put("parent", f1[i].getParent());
-						insertMap.put("path", f1[i].toString());
-						insertList.add(insertMap);
-					}
-				}
-			}
-			
-			bookManager.deleteInvalidBook();			
-
-			for (int i = 0; i < insertList.size(); i++) {
-				try {
-					if (insertList.get(i) != null) {
-						BookInfo book = new BookInfo();
-						book.parent = insertList.get(i).get("parent");
-						book.path = insertList.get(i).get("path");
-						book.type = "2";
-						book.now = "0";
-						bookManager.insertBook(book);
-					}
-				} catch (SQLException e) {
-					Log.e("hck", "setApprove SQLException", e);
-				} catch (Exception e) {
-					Log.e("hck", "setApprove Exception", e);
-				}
-			}
+			}	
 			
 			sp.edit().putBoolean("isInit", true).commit();
 			return null;

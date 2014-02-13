@@ -11,7 +11,7 @@ public class DefaultActivity extends Activity{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		if(isDrawTitle()){
+		if(!isDrawTitle()){
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 		}
 		

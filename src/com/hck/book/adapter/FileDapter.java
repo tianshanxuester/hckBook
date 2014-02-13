@@ -39,10 +39,10 @@ public FileDapter(Context context,ArrayList<Map<String, Object>> aList,int a)
 		return arg0;
 	}
 	@Override
-	public View getView(int arg0, View arg1, ViewGroup arg2) {
+	public View getView(int position, View arg1, ViewGroup arg2) {
 		View view=arg1;
 		if (view==null) {
-			view=LayoutInflater.from(context).inflate(R.layout.item_in, null);
+			view=LayoutInflater.from(context).inflate(R.layout.item_import, null);
 			getView=new GetView();
 			getView.imageView=(ImageView) view.findViewById(R.id.im);
 			getView.textView=(TextView) view.findViewById(R.id.name2);
@@ -56,21 +56,23 @@ public FileDapter(Context context,ArrayList<Map<String, Object>> aList,int a)
 		else {
 			getView=(GetView) view.getTag();
 		}
-		String string=aList.get(arg0).get("icon").toString();
-		getView.imageView.setImageResource(Integer.parseInt(string));
-		getView.textView.setText(aList.get(arg0).get("name").toString());
-		if (aList.get(arg0).get("num")!=null) {
-			getView.textView2.setText(aList.get(arg0).get("num").toString());
+		Map<String, Object>  map = aList.get(position);
+		String icon=map.get("icon").toString();
+		getView.imageView.setImageResource(Integer.parseInt(icon));
+		
+		getView.textView.setText(map.get("name").toString());
+		if (map.get("num")!=null) {
+			getView.textView2.setText(map.get("num").toString());
 		}
-		if (aList.get(arg0).get("imChoose")!=null) {
-			String string1=aList.get(arg0).get("imChoose").toString();
+		if (map.get("imChoose")!=null) {
+			String string1=map.get("imChoose").toString();
 			getView.imageView2.setImageResource(Integer.parseInt(string1));
 		}
-		if (aList.get(arg0).get("imChoosezz")!=null) {
-			getView.textView3.setText(aList.get(arg0).get("imChoosezz").toString());
+		if (map.get("imChoosezz")!=null) {
+			getView.textView3.setText(map.get("imChoosezz").toString());
 		}
 		
-		if (arg0==0 && a==2) {
+		if (position==0 && a==2) {
 			getView.textView.setVisibility(View.GONE);
 			getView.textView5.setVisibility(View.INVISIBLE);
 			getView.textView2.setVisibility(View.INVISIBLE);

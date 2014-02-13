@@ -3,8 +3,6 @@ package com.hck.book.ui;
 
 import java.util.List;
 
-import com.hck.book.util.MangerActivitys;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -46,8 +44,7 @@ public class BookShelfActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.main);
-        MangerActivitys.activitys.add(this);
+        setContentView(R.layout.main);        
         bookShelf = (GridView) findViewById(R.id.bookShelf);
         ShlefAdapter adapter=new ShlefAdapter();
         bookShelf.setAdapter(adapter);

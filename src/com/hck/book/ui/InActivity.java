@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
@@ -28,7 +27,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -39,17 +37,19 @@ import android.widget.TextView;
 
 import com.hck.book.adapter.FileDapter;
 import com.hck.book.helper.BookDB;
-import com.hck.book.util.MangerActivitys;
+import com.hck.book.util.LogUtil;
+import com.hck.book.vo.BookInfo;
 import com.hck.book.vo.BookVo;
 import com.hck.date.FinalDate;
 import com.hck.test.R;
+import com.wxd.bookreader.manager.BookManager;
 /**
  * 文件的导入
  * 
  * @author
  * 
  */
-public class InActivity extends Activity implements OnClickListener {
+public class InActivity extends DefaultActivity implements OnClickListener {
 	protected static final String TAG = "InActivity";
 	protected ListView lv;
 	protected TextView tt, tv1;
@@ -64,25 +64,23 @@ public class InActivity extends Activity implements OnClickListener {
 	protected ArrayList<Map<String, Object>> aList;
 	protected int a;
 	protected int i;
-	protected Boolean b = true;
-	protected ArrayList<String> names = null;
+	protected Boolean b = true;	
 	protected ArrayList<String> paths = null;
 	private TextView all;
 	private int Image[] = { R.drawable.ok1, R.drawable.no1 };
 	private Button aaaa;
-	private String PATH = "path";
-	private String TYPE = "type";
 	private PopupWindow mPopupWindow;
 	private View popunwindwow;
 	private BookDB localbook;
-	private HashMap<String, ArrayList<BookVo>> map1;
+	private HashMap<String, ArrayList<BookVo>> importedBooks;
 	protected Boolean ok = false;
 	protected ProgressDialog mpDialog = null;
-	private ArrayList<HashMap<String, String>> insertList;
-	private HashMap<String, String> insertMap;
+	private ArrayList<BookInfo> insertList = new ArrayList<BookInfo>();
 	protected ArrayList<Integer> intList;
 	protected Context context;
 	protected AlertDialog ab;
+	private BookManager bookManager = new BookManager();
+	
 	private Thread InThread = new Thread() {
 		@Override
 		public void run() {
@@ -97,6 +95,7 @@ public class InActivity extends Activity implements OnClickListener {
 			mHandler.sendEmptyMessage(1);
 		}
 	};
+	
 	private Thread updateThread = new Thread() {
 		File sdpath = Environment.getExternalStorageDirectory();
 		@Override
@@ -118,81 +117,64 @@ public class InActivity extends Activity implements OnClickListener {
 		public void handleMessage(Message msg) {
 			if (msg.what == 1) {
 				insert();
-				map1 = select();
+				importedBooks = select();
 				show("a");
-					mpDialog.dismiss();
+				mpDialog.dismiss();
 			} else if (msg.what == 2) {
-				// flshThread.stopThread();
 				flu();
 			}
 		}
 	};
+	
 	/**
 	 * 遍历SD卡,将数据存入insertList
 	 */
 	public void printAllFile(File f) {
-
 		if (f.isFile()) {
-			if (f.toString().contains(".txt")) {
-				insertMap = new HashMap<String, String>();
-				insertMap.put("parent", f.getParent());
-				insertMap.put("path", f.toString());
-				insertList.add(insertMap);
+			if (f.toString().endsWith(".txt")) {
+				BookInfo info = new BookInfo();
+				info.parent=f.getParent();
+				info.path= f.toString();
+				info.type = BookInfo.BOOK_TYPE_IMPORT;
+				info.now = "0";				
+				insertList.add(info);
 			}
 		}
-		if (f.isDirectory()) {
-			if (f!=null) {
-				File[] f1 = f.listFiles();
-				if (f1==null) {
-					return;
-				}
-				int len = f1.length;
-				for (int i = 0; i < len; i++) {
-					printAllFile(f1[i]);
-				}
+		if (f.isDirectory()) {			
+			File[] f1 = f.listFiles();
+			if (f1==null) {
+				return;
 			}
+			int len = f1.length;
+			for (int i = 0; i < len; i++) {
+				printAllFile(f1[i]);
+			}			
 		}
 
 	}
+	
 	/**
 	 * 将数据写入数据库
 	 */
-	public void insert() {
-		SQLiteDatabase db = localbook.getWritableDatabase();
-		for (int i = 0; i < insertList.size(); i++) {
-			try {
-				if (insertList.get(i) != null) {
-					String s = insertList.get(i).get("parent");
-					String s1 = insertList.get(i).get("path");
-					String sql1 = "insert into " + FinalDate.DATABASE_TABKE + " (parent,"
-							+ PATH + ", " + TYPE + ",now,ready) values('" + s
-							+ "','" + s1 + "',0,0,null" + ");";
-					db.execSQL(sql1);
-				}
-			} catch (SQLException e) {
-				Log.e(TAG, "insert sqlException error", e);
-			} catch (Exception e) {
-				Log.e(TAG, "insert Exception error", e);
-			}
-		}
-		mPopupWindow.dismiss();
-		db.close();
+	public void insert() { 
+		bookManager.insertBooks(insertList);
+		mPopupWindow.dismiss();		
 	}
+	
 	/**
-	 * 判断并显示数据
-	 * 
-	 * @param p
+	 * 判断并显示数据,显示所有扫描的电子书
+	 *
 	 */
 	public void show(String p) {
 		Log.i("hck", "show");
-		Set<String> set1 = map1.keySet();
+		Set<String> importedBookSet = importedBooks.keySet();
 		if (p.equals("a")) {
 			aList = new ArrayList<Map<String, Object>>();
-			name = new String[set1.size()];
+			name = new String[importedBookSet.size()];
 			paths = new ArrayList<String>();
 			i = 0;
 			mapIn.clear();
-			Iterator<String> it = set1.iterator();
+			Iterator<String> it = importedBookSet.iterator();
 			while (it.hasNext()) {
 				a = 0;
 				paths.add((String) it.next());
@@ -205,7 +187,7 @@ public class InActivity extends Activity implements OnClickListener {
 				} else {
 					map.put("name", name[i]);
 				}
-				map.put("num", map1.get(paths.get(i)).size());
+				map.put("num", importedBooks.get(paths.get(i)).size());
 				aList.add(map);
 				i = i + 1;
 			}
@@ -216,7 +198,7 @@ public class InActivity extends Activity implements OnClickListener {
 			setDate(1);
 		} else {
 			aList = new ArrayList<Map<String, Object>>();
-			ArrayList<BookVo> al = map1.get(paths.get(Integer.parseInt(p)));
+			ArrayList<BookVo> al = importedBooks.get(paths.get(Integer.parseInt(p)));
 			paths = new ArrayList<String>();
 			Map<String, Object> map2 = new HashMap<String, Object>();
 			map2.put("icon", R.drawable.back);
@@ -262,29 +244,18 @@ public class InActivity extends Activity implements OnClickListener {
 		aaaa.setOnClickListener(this);
 	}
 
-	/**
-	 * 设置adapter
-	 * public void aaa() {
-		
-		SimpleAdapter listItemAdapter = new SimpleAdapter(this, aList,
-				R.layout.item_in, new String[] { "icon", "name", "num",
-						"imChoose", "imChoosezz" }, new int[] { R.id.im,
-						R.id.tv1, R.id.tv2, R.id.imChoose, R.id.imChoosezz });
-		lv.setAdapter(listItemAdapter);
-	}
-
-	 */
 	public void setDate(int a) {
 		Log.i("hck", "setDate");
-	FileDapter	aDapter=new FileDapter(this, aList,a);
+		FileDapter	aDapter=new FileDapter(this, aList,a);
 		lv.setAdapter(aDapter);
 		Log.i("hck", "adpter");
 	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		super.onCreate(savedInstanceState);		
 		setContentView(R.layout.in);
+		
 		tv1 = (TextView) findViewById(R.id.name2);
 		lv = (ListView) findViewById(R.id.ListView02);
 		context = this;
@@ -292,35 +263,32 @@ public class InActivity extends Activity implements OnClickListener {
 		all = (TextView) findViewById(R.id.all);
 		all.setVisibility(View.GONE);
 		localbook = new BookDB(this);
-		insertList = new ArrayList<HashMap<String, String>>();
-		popunwindwow = this.getLayoutInflater().inflate(R.layout.popwindow,
-				null);
-		mPopupWindow = new PopupWindow(popunwindwow, LayoutParams.FILL_PARENT,
-				LayoutParams.WRAP_CONTENT);
+		
+		popunwindwow = this.getLayoutInflater().inflate(R.layout.popwindow,	null);
+		mPopupWindow = new PopupWindow(popunwindwow, LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT);
 		mapIn = new HashMap<String, Integer>();// 记录点击准备导入的文件
 		parentmap = new HashMap<String, Integer>();
 		set = new HashSet<String>();
 		list = new ArrayList<String>();
 		// 遍历数据库lackbook 如果数据库为空开启线程 遍历SD卡 否则直接从数据库中提取显示
-		if (select().isEmpty()) {
-			Log.i("hck", "runrun");
+		if (select().isEmpty()) {			
 			// 导入文件
+			LogUtil.debug("准备导入文件！");
 			showProgressDialog("请稍后......");
 			InThread.start();
 		} else {
+			LogUtil.debug("准备刷新文件！");
 			// 刷新文件
 			showProgressDialog("请稍后.....");
-			updateThread.start();
-			// 显示文件
-			// map1 = select();
-			// show("a");
+			updateThread.start();			
 		}
+		
+		
 		// 处理导入文件时listview内的点击事件
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
-				String p = paths.get(arg2);
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,long arg3) {
+				String p = paths.get(position);
 				all.setVisibility(View.GONE);
 				// 回到根目录
 				if (p.equals("a")) {
@@ -331,12 +299,12 @@ public class InActivity extends Activity implements OnClickListener {
 					File file = new File(p);
 					String s = file.getParent();
 					if (file.isFile()) {
-						if (map1.get(s).get(arg2 - 1).getLocal() == 0) {
+						if (importedBooks.get(s).get(position - 1).getLocal() == 0) {
 							if (!mapIn.containsKey(p)) {
-								Map<String, Object> map1 = aList.get(arg2);
+								Map<String, Object> map1 = aList.get(position);
 								map1.put("imChoose", Image[0]);
 								setDate(2);
-								mapIn.put(p, arg2);
+								mapIn.put(p, position);
 								if (!mPopupWindow.isShowing()) {
 									pop();
 									aaaa.setText("确认导入("
@@ -346,7 +314,7 @@ public class InActivity extends Activity implements OnClickListener {
 								aaaa.setText("确认导入("
 										+ String.valueOf(mapIn.size()) + ")");
 							} else {
-								Map<String, Object> map1 = aList.get(arg2);
+								Map<String, Object> map1 = aList.get(position);
 								map1.put("imChoose", Image[1]);
 								setDate(2);
 								mapIn.remove(p);
@@ -358,7 +326,7 @@ public class InActivity extends Activity implements OnClickListener {
 							}
 						}
 					} else {
-						show(String.valueOf(arg2));
+						show(String.valueOf(position));
 					}
 				}
 			}
@@ -374,7 +342,7 @@ public class InActivity extends Activity implements OnClickListener {
 						File file = new File(paths.get(i));
 						String s = file.getParent();
 						if (file.isFile()) {
-							if (map1.get(s).get(i - 1).getLocal() == 0) {
+							if (importedBooks.get(s).get(i - 1).getLocal() == 0) {
 
 								if (!mapIn.containsKey(paths.get(i))) {
 									Map<String, Object> map1 = aList.get(i);
@@ -402,7 +370,7 @@ public class InActivity extends Activity implements OnClickListener {
 						File file = new File(paths.get(i));
 						String s = file.getParent();
 						if (file.isFile()) {
-							if (map1.get(s).get(i - 1).getLocal() == 0) {
+							if (importedBooks.get(s).get(i - 1).getLocal() == 0) {
 								if (mapIn.containsKey(paths.get(i))) {
 									Map<String, Object> map1 = aList.get(i);
 									map1.put("imChoose", Image[1]);
@@ -434,9 +402,10 @@ public class InActivity extends Activity implements OnClickListener {
 	public void flu() {
 		ArrayList<HashMap<String, String>> dbList = new ArrayList<HashMap<String, String>>();
 		SQLiteDatabase db = localbook.getReadableDatabase();
+
+		//将数据库中的所有数据添加到dbList
 		String col[] = { "parent", "path" };
 		Cursor cur = db.query(FinalDate.DATABASE_TABKE, col, null, null, null, null, null);
-		// 讲数据库中的所有数据添加到dbList
 		while (cur.moveToNext()) {
 			HashMap<String, String> dbMap = new HashMap<String, String>();
 			String s1 = cur.getString(cur.getColumnIndex("path"));
@@ -445,51 +414,39 @@ public class InActivity extends Activity implements OnClickListener {
 			dbMap.put("path", s1);
 			dbList.add(dbMap);
 		}
-		SQLiteDatabase db5 = localbook.getReadableDatabase();
-		Cursor cur2 = db5.query(FinalDate.DATABASE_TABKE, new String[]{"path"}, "type=2", null, null, null, null);
-		Integer num = cur2.getCount();
-		Log.i("hck", "InActivity444  :" +num+"");
-		// 将遍历SD卡得到的insertList 与 dbList进行比较 并进行处理
+		
+		
+		//将遍历SD卡得到的insertList与 dbList进行比较 并进行处理
 		for (int i = 0; i < dbList.size(); i++) {
 			if (insertList.size() == 0) {
 				SQLiteDatabase db1 = localbook.getWritableDatabase();
-				db1.delete(FinalDate.DATABASE_TABKE, "path='" + dbList.get(i).get("path")
-						+ "'", null);
+				db1.delete(FinalDate.DATABASE_TABKE, "path='" + dbList.get(i).get("path")+ " and type=0'", null);
 				db1.close();
 			} else {
+				//如果选择的待插入的书籍已经导入，则从选择中移除
 				for (int j = 0; j < insertList.size(); j++) {
-					if (insertList.get(j).get("parent")
-							.equals(dbList.get(i).get("parent"))
-							&& insertList.get(j).get("path")
-									.equals(dbList.get(i).get("path"))) {
-						insertList.remove(j);
-						j = j - 1;
-						break;
-					} else {
-//						Log.i("hck", "463"+"j: "+j+dbList.get(i).get("path"));
-//						if (j == insertList.size() - 2) {
-//							SQLiteDatabase db1 = localbook
-//									.getWritableDatabase();
-//							db1.delete(FinalDate.DATABASE_TABKE, "path='"
-//									+ dbList.get(i).get("path") + "'", null);
-//							db1.close();
-//						}
-					}
+					if (insertList.get(j).parent.equals(dbList.get(i).get("parent"))
+						&& insertList.get(j).path.equals(dbList.get(i).get("path"))) {							
+							insertList.remove(j);
+							j = j - 1;
+							break;
+					} 
 				}
-			}
+			}			
 		}
 		
 		db.close();
 		insert();
-		map1 = select();
+		importedBooks = select();
 		show("a");
+		
 		try {
 			mpDialog.dismiss();
 		} catch (Exception e) {
 		}
-		
-		
 	}
+
+
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -503,7 +460,7 @@ public class InActivity extends Activity implements OnClickListener {
 					String s = (String) it.next();
 					File f = new File(s);
 					String s1 = f.getParent();
-					map1.get(s1).get(mapIn.get(s) - 1).setLocal(1);// 设置导入状态
+					importedBooks.get(s1).get(mapIn.get(s) - 1).setLocal(1);// 设置导入状态
 					Map<String, Object> map = aList.get(mapIn.get(s));
 					map.remove("imChoose");
 					map.put("imChoosezz", "已导入");
@@ -527,28 +484,29 @@ public class InActivity extends Activity implements OnClickListener {
 		}
 	}
 	/**
-	 * 遍历数据库 将数据存入map1
+	 * 遍历数据库 将数据存入map1，取出的结果是按照父路径进行分组的，其中父路径为key，value为父亲路径下的书籍
 	 * 
-	 * @return map1
 	 */
 	public HashMap<String, ArrayList<BookVo>> select() {
 		SQLiteDatabase db = localbook.getReadableDatabase();
-		String col[] = { "parent" };
-		Cursor cur = db.queryWithFactory(null, true, FinalDate.DATABASE_TABKE, col,
-				"type<>2", null, null, null, null, null);
+		String col[] = {"parent"};
+		//取出所有用户导入的书籍的父路径
+		Cursor cur = db.queryWithFactory(null, true, FinalDate.DATABASE_TABKE, col,	"type<>2", null, null, null, null, null);
 		ArrayList<String> arraylist1 = new ArrayList<String>();
 
 		HashMap<String, ArrayList<BookVo>> map1 = new HashMap<String, ArrayList<BookVo>>();
 		while (cur.moveToNext()) {
 			String s1 = cur.getString(cur.getColumnIndex("parent"));
 			arraylist1.add(s1);
-		}
+		}		
+		
+		LogUtil.debug("导入书籍的父路径集合："+arraylist1);
+		
+		//取出父路径下面所有的书籍
 		String col1[] = { "path", "type" };
 		for (int i = 0; i < arraylist1.size(); i++) {
 			ArrayList<BookVo> arraylist2 = new ArrayList<BookVo>();
-			Cursor cur1 = db.query(FinalDate.DATABASE_TABKE, col1,
-					"parent = '" + arraylist1.get(i) + "'", null, null, null,
-					null);
+			Cursor cur1 = db.query(FinalDate.DATABASE_TABKE, col1,"parent = '" + arraylist1.get(i) + "'", null, null, null,null);
 			while (cur1.moveToNext()) {
 				String s2 = cur1.getString(cur1.getColumnIndex("path"));
 				int s3 = cur1.getInt(cur1.getColumnIndex("type"));
@@ -567,9 +525,7 @@ public class InActivity extends Activity implements OnClickListener {
 	 */
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-
 			Intent it = new Intent();
 			it.setClass(InActivity.this, BookListActivity2.class);
 			it.putExtra("nol", "l");
@@ -578,12 +534,7 @@ public class InActivity extends Activity implements OnClickListener {
 		}
 		return true;
 	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		Log.i("hck", "");
-	}
+	
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -608,4 +559,9 @@ public class InActivity extends Activity implements OnClickListener {
 		startActivity(intent);
 		this.finish();
 	}
+
+	@Override
+	protected boolean isFullScreen() {
+		return false;
+	}	
 }

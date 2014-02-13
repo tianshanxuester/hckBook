@@ -218,7 +218,7 @@ public final class R {
         public static final int head=0x7f030002;
         public static final int in=0x7f030003;
         public static final int item1=0x7f030004;
-        public static final int item_in=0x7f030005;
+        public static final int item_import=0x7f030005;
         public static final int item_mark=0x7f030006;
         public static final int item_menu=0x7f030007;
         public static final int loding=0x7f030008;

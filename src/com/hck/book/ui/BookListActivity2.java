@@ -32,7 +32,6 @@ import android.widget.Toast;
 import com.hck.book.helper.BookDB;
 import com.hck.book.helper.MarkHelper;
 import com.hck.book.util.AlertDialogs;
-import com.hck.book.util.MangerActivitys;
 import com.hck.book.util.PinyinListComparator;
 import com.hck.date.FinalDate;
 import com.hck.test.R;
@@ -53,14 +52,11 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 	private int post;
 	
 	
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); //»•µÙ±ÍÃ‚¿∏
 		setContentView(R.layout.main);
-		
-		MangerActivitys.activitys.add(this);
 		
 		
 		toolbarGrid=(GridView) findViewById(R.id.bookShelf);
@@ -269,26 +265,6 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 			}
 	    	
 	    }
-	
-
-	@Override
-	protected void onDestroy() {
-
-		super.onDestroy();
-		
-		for (int i = 0; i < MangerActivitys.activitys.size(); i++) {
-			if (MangerActivitys.activitys.get(i)!=null) {
-				((Activity)MangerActivitys.activitys.get(i)).finish();
-			}
-		}
-		FinalDate.isTrue=false;
-		FinalDate.mConnection=null;
-	
-		MyApplication.bookDB=null;
-		finish();
-		System.gc();
-	}
-
 	
 	@Override
 	protected void onPause() {

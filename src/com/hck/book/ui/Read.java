@@ -45,7 +45,7 @@ import android.widget.Toast;
 import com.hck.book.helper.MarkHelper;
 import com.hck.book.mydialog.MarkDialog;
 import com.hck.book.util.InstallManager;
-import com.hck.book.util.MangerActivitys;
+
 import com.hck.book.util.SpeekUtil;
 import com.hck.book.vo.MarkVo;
 import com.hck.test.R;
@@ -272,8 +272,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		requestWindowFeature(Window.FEATURE_NO_TITLE);		
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 		
-		mContext = getBaseContext();
-		MangerActivitys.activitys.add(this);
+		mContext = getBaseContext();		
 		isStart = false;
 		WindowManager manage = getWindowManager();
 		Display display = manage.getDefaultDisplay();
