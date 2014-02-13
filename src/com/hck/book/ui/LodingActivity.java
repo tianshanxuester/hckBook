@@ -73,8 +73,7 @@ public class LodingActivity extends Activity {
 	//	getInfo();
 		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.loding);
 		imageView = (ImageView) findViewById(R.id.loding_im);
 		animation = AnimationUtils.loadAnimation(this, R.anim.loding);

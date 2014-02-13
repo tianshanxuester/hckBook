@@ -8,12 +8,8 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -24,10 +20,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
-import android.os.RemoteException;
-import android.provider.UserDictionary.Words;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -52,16 +45,12 @@ import android.widget.Toast;
 import com.hck.book.helper.MarkHelper;
 import com.hck.book.mydialog.MarkDialog;
 import com.hck.book.util.InstallManager;
-import com.hck.book.util.IsNetWork;
 import com.hck.book.util.MangerActivitys;
 import com.hck.book.util.SpeekUtil;
-import com.hck.book.util.UpdateManager;
 import com.hck.book.vo.MarkVo;
-import com.hck.date.FinalDate;
 import com.hck.test.R;
 
-public class Read extends Activity implements OnClickListener,
-		OnSeekBarChangeListener {
+public class Read extends Activity implements OnClickListener,	OnSeekBarChangeListener {
 	private LinearLayout layout;
 	private AlertDialog dialog;
 	private static final String TAG = "Read2";
@@ -277,12 +266,12 @@ public class Read extends Activity implements OnClickListener,
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState); 
 		
- 
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		//去掉标题栏，全屏显示
+		requestWindowFeature(Window.FEATURE_NO_TITLE);		
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
+		
 		mContext = getBaseContext();
 		MangerActivitys.activitys.add(this);
 		isStart = false;

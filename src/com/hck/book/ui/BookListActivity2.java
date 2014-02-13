@@ -25,7 +25,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,7 +57,7 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_NO_TITLE); //去掉标题栏
 		setContentView(R.layout.main);
 		
 		MangerActivitys.activitys.add(this);
@@ -66,29 +65,30 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 		
 		toolbarGrid=(GridView) findViewById(R.id.bookShelf);
 		localbook = new BookDB(this,FinalDate.DATABASE_TABKE);
-			getDate();
-			sp=getSharedPreferences("book", Context.MODE_PRIVATE);
+		
+		getDate();
+		sp=getSharedPreferences("book", Context.MODE_PRIVATE);
+		
 		toolbarGrid.setOnItemLongClickListener(new OnItemLongClickListener() {
-
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
 				Log.i("hck", "longclick ");
 				post=arg2;
-	   new AlertDialogs(BookListActivity2.this,BookListActivity2.this)
-	   .alertDialog("确定删除吗？", "", "删除", "取消", "delete");
-				return true;
-			}
-		});
+			   new AlertDialogs(BookListActivity2.this,BookListActivity2.this)
+			   .alertDialog("确定删除吗？", "", "删除", "取消", "delete");
+						return true;
+					}
+				});
+		
 		toolbarGrid.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,long arg3) {
 				try {
 					
 					// 修改数据库中图书的最近阅读状态为1
-					String s = (String) listItem.get(arg2).get("path");
+					String s = (String) listItem.get(position).get("path");
 					SQLiteDatabase db = localbook.getWritableDatabase();
 
 					File f = new File(s);
@@ -100,7 +100,7 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 						values.put("now", 1);// key为字段名，value为值
 						db.update(FinalDate.DATABASE_TABKE, values, "path=?", new String[] { s });// 修改状态为图书被已被导入
 						db.close();
-						String path = (String) listItem.get(arg2).get("path");
+						String path = (String) listItem.get(position).get("path");
 						it = new Intent();
 						it.setClass(BookListActivity2.this, Read.class);
 						it.putExtra("path", path);

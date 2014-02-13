@@ -6,7 +6,7 @@
 
         <Button
             android:onClick="showHelp"
-             android:paddingLeft="3dp"
+            android:paddingLeft="3dp"
             android:paddingRight="3dp"
             android:id="@+id/btn_leftTop"
             android:layout_width="45dp"
@@ -21,7 +21,7 @@
         <TextView
             android:gravity="center"
             android:id="@+id/tv_head"
-             android:layout_width="wrap_content"
+            android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:layout_centerInParent="true"
             android:shadowColor="#ff000000"
