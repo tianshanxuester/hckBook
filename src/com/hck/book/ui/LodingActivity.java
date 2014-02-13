@@ -6,26 +6,29 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import android.app.Activity;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.hck.book.vo.BookInfo;
 import com.hck.date.FinalDate;
 import com.hck.test.R;
+import com.wxd.bookreader.manager.BookManager;
 
 public class LodingActivity extends DefaultActivity {
 
 	private ImageView imageView;	
 	private SharedPreferences sp;
 	private Editor editor;	
+	
+	BookManager bookManager = new BookManager();
 	
 
 	@Override
@@ -68,12 +71,9 @@ public class LodingActivity extends DefaultActivity {
 			String[] strings = getResources().getStringArray(R.array.bookid);// 获取assets目录下的文件列表
 			for (int i = 0; i < strings.length; i++) {
 				try {
-					FileOutputStream out = new FileOutputStream(path + "/"
-							+ strings[i]);
-					BufferedInputStream bufferedIn = new BufferedInputStream(
-							getResources().openRawResource(R.raw.book0 + i));
-					BufferedOutputStream bufferedOut = new BufferedOutputStream(
-							out);
+					FileOutputStream out = new FileOutputStream(path + "/"+ strings[i]);
+					BufferedInputStream bufferedIn = new BufferedInputStream(getResources().openRawResource(R.raw.book0 + i));
+					BufferedOutputStream bufferedOut = new BufferedOutputStream(out);
 					byte[] data = new byte[2048];
 					int length = 0;
 					while ((length = bufferedIn.read(data)) != -1) {
@@ -84,6 +84,7 @@ public class LodingActivity extends DefaultActivity {
 					// 关闭流
 					bufferedIn.close();
 					bufferedOut.close();
+					
 					sp.edit().putBoolean("isInit", true).commit();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -103,19 +104,18 @@ public class LodingActivity extends DefaultActivity {
 					}
 				}
 			}
-			SQLiteDatabase db = MyApplication.bookDB.getWritableDatabase();
-			db.delete(FinalDate.DATABASE_TABKE, "type='" + 2 + "'", null);
+			
+			bookManager.deleteInvalidBook();			
 
 			for (int i = 0; i < insertList.size(); i++) {
 				try {
 					if (insertList.get(i) != null) {
-						String s = insertList.get(i).get("parent");
-						String s1 = insertList.get(i).get("path");
-						String sql1 = "insert into " + FinalDate.DATABASE_TABKE
-								+ " (parent,path" + ", type"
-								+ ",now,ready) values('" + s + "','" + s1
-								+ "',2,0,null" + ");";
-						db.execSQL(sql1);
+						BookInfo book = new BookInfo();
+						book.parent = insertList.get(i).get("parent");
+						book.path = insertList.get(i).get("path");
+						book.type = "2";
+						book.now = "0";
+						bookManager.insertBook(book);
 					}
 				} catch (SQLException e) {
 					Log.e("hck", "setApprove SQLException", e);
@@ -123,7 +123,7 @@ public class LodingActivity extends DefaultActivity {
 					Log.e("hck", "setApprove Exception", e);
 				}
 			}
-			db.close();
+			
 			sp.edit().putBoolean("isInit", true).commit();
 			return null;
 		}

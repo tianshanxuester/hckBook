@@ -291,7 +291,7 @@ public class InActivity extends Activity implements OnClickListener {
 		imChoose = (ImageView) findViewById(R.id.imChoose);
 		all = (TextView) findViewById(R.id.all);
 		all.setVisibility(View.GONE);
-		localbook = new BookDB(this, FinalDate.DATABASE_TABKE);
+		localbook = new BookDB(this);
 		insertList = new ArrayList<HashMap<String, String>>();
 		popunwindwow = this.getLayoutInflater().inflate(R.layout.popwindow,
 				null);

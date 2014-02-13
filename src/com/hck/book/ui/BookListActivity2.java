@@ -64,7 +64,7 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 		
 		
 		toolbarGrid=(GridView) findViewById(R.id.bookShelf);
-		localbook = new BookDB(this,FinalDate.DATABASE_TABKE);
+		localbook = new BookDB(this);
 		
 		getDate();
 		sp=getSharedPreferences("book", Context.MODE_PRIVATE);
