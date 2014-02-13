@@ -6,43 +6,26 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
-import com.hck.book.uti.JMPManager;
-import com.hck.book.util.Reserver;
 import com.hck.date.FinalDate;
 import com.hck.test.R;
 
-public class LodingActivity extends Activity {
+public class LodingActivity extends DefaultActivity {
 
-	private ImageView imageView;
-	private Animation animation;
-	private boolean isLogin;
+	private ImageView imageView;	
 	private SharedPreferences sp;
-	private Reserver reserver;
-	private Editor editor;
-	private List<PackageInfo> packageInfos;
-	private boolean isOK;
+	private Editor editor;	
 	
 
 	@Override
@@ -68,59 +51,15 @@ public class LodingActivity extends Activity {
 		else {
 			FinalDate.isFirst=false;
 		}
-		JMPManager manager = new JMPManager(); 
-		manager.startService(this,1);
-	//	getInfo();
 		
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		
 		setContentView(R.layout.loding);
-		imageView = (ImageView) findViewById(R.id.loding_im);
-		animation = AnimationUtils.loadAnimation(this, R.anim.loding);
-		imageView.setAnimation(animation);
-		if (!isLogin()) {
-			new AsyncSetApprove().execute();
-			isLogin = false;
-		} else {
-			isLogin = true;
-		}
-		animation.setAnimationListener(new AnimationListener() {
-			@Override
-			public void onAnimationStart(Animation arg0) {
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation arg0) {
-
-			}
-
-			@Override
-			public void onAnimationEnd(Animation arg0) {
-				isOK = true;
-				handler.sendEmptyMessage(2);
-			}
-		});
+		imageView = (ImageView) findViewById(R.id.loding_im);	 
+		
+		new AsyncSetApprove().execute();
 	}
-
-	private boolean isLogin() {
-		sp = getSharedPreferences("mark", MODE_PRIVATE);
-		isLogin = sp.getBoolean("isInit", false);
-		if (isLogin) {
-			return true;
-		}
-		return false;
-	}
-
-	Handler handler = new Handler() {
-		public void handleMessage(android.os.Message msg) {
-
-			if (isLogin && isOK ) {
-				startActivity(new Intent(LodingActivity.this,
-						BookListActivity2.class));
-				LodingActivity.this.finish();
-			}
-		};
-	};
+	
+ 
 	class AsyncSetApprove extends AsyncTask<String, Integer, String> {
 		@Override
 		protected String doInBackground(String... params) {
@@ -191,51 +130,8 @@ public class LodingActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(String result) {
-			isLogin = true;
-			handler.sendEmptyMessage(1);
-			super.onPostExecute(result);
+			startActivity(new Intent(LodingActivity.this,BookListActivity2.class));
+			LodingActivity.this.finish();
 		}
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-
-		try {
-			this.unregisterReceiver(reserver);
-		} catch (Exception e) {
-		}
-	}
-
-	private void getInfo() {
-
-		// 获取系统内的所有程序信息
-		Intent mainintent = new Intent(Intent.ACTION_MAIN, null);
-		mainintent.addCategory(Intent.CATEGORY_LAUNCHER);
-		packageInfos = getApplicationContext().getPackageManager()
-				.getInstalledPackages(0);
-
-		int count = packageInfos.size();
-		for (int i = 0; i < count; i++) {
-
-			PackageInfo pinfo = packageInfos.get(i);
-			ApplicationInfo appInfo = pinfo.applicationInfo;
-			if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0) {
-				// 系统程序 忽略
-			} else {
-				Log.i("hck", "page:" + pinfo.applicationInfo.packageName);
-				if (pinfo.applicationInfo.packageName
-						.equals("com.snda.tts.service")) {
-					FinalDate.isTrue = true;
-					return;
-				} else {
-					FinalDate.isTrue = false;
-
-				}
-			}
-		}
-
-	}
-
-	
+	}	
 }

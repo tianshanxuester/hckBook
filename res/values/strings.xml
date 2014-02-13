@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">蝌蚪听书</string>
+    <string name="app_name">星空阅读器</string>
     <string name="input_text">导入本地小说</string>
     <string name="bookpop_size">字体</string>
     <string name="bookpop_light">亮度</string>

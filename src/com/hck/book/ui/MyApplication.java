@@ -2,10 +2,7 @@ package com.hck.book.ui;
 
 
 import android.app.Application;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.hck.book.helper.BookDB;
@@ -21,15 +18,10 @@ public class MyApplication extends Application {
 		super.onCreate();
 		Log.i("hck", "oncreat");
 		context = getApplicationContext();
-		initDateBase();
-		
-		
+		initDateBase();		
 	}
 
 	private static void initDateBase() {
 		bookDB = new BookDB(context, FinalDate.DATABASE_TABKE);
 	}
-	
-
-	
 }
