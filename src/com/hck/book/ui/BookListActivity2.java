@@ -117,7 +117,7 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 	public void addText(View view)
 	{
 		Intent intent = new Intent();
-		intent.setClass(BookListActivity2.this, InActivity.class);
+		intent.setClass(BookListActivity2.this, TxtFileExplorerActivity.class);
 		startActivity(intent);
 		this.finish();
 	}
@@ -225,11 +225,10 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 			}
 		}
 		Collections.sort(listItem, new PinyinListComparator());
-	//	if (adapter == null) {
+ 
 			adapter = new ShlefAdapter();
 			toolbarGrid.setAdapter(adapter);
-	//	}
-	//	adapter.notifyDataSetChanged();
+	 
 	}
 
 
@@ -321,6 +320,4 @@ public class BookListActivity2 extends Activity implements BaseActivity{
 		// 重新载入页面
 		getDate();
 	}
-	
-
 }

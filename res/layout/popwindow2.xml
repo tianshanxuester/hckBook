@@ -5,7 +5,7 @@
     android:background="@drawable/titlebar_big" >
 
     <Button
-        android:id="@+id/aaaa"
+        android:id="@+id/btn_import_books"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
