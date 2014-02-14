@@ -44,15 +44,5 @@
         android:drawableTop="@drawable/reader_jump_to"
         android:gravity="center"
         android:text="@string/bookpop_send" />
-    <TextView
-        android:layout_marginTop="1dp"
-         style="@style/text_style"
-        android:id="@+id/text_speak"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:drawableTop="@drawable/pp"
-        android:gravity="center"
-        android:text="@string/speak" />
 
 </LinearLayout>

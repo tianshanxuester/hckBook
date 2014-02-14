@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,7 +31,6 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -44,15 +42,11 @@ import android.widget.Toast;
 
 import com.hck.book.helper.MarkHelper;
 import com.hck.book.mydialog.MarkDialog;
-import com.hck.book.util.InstallManager;
-
-import com.hck.book.util.SpeekUtil;
 import com.hck.book.vo.MarkVo;
 import com.hck.test.R;
 
 public class Read extends Activity implements OnClickListener,	OnSeekBarChangeListener {
 	private LinearLayout layout;
-	private AlertDialog dialog;
 	private static final String TAG = "Read2";
 	private static int begin = 0;// 记录的书籍开始位置
 	public static Canvas mCurPageCanvas, mNextPageCanvas;
@@ -90,11 +84,6 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 	private SharedPreferences sp;
 	int defaultSize = 0;
 	public static String words;
-	private boolean isStart;
-	private InstallManager mManager = null;
-	private Button button3;
-	
-	private SpeekUtil speekUtil;
 	// 实例化Handler
 	public Handler mHandler = new Handler() {
 		// 接收子线程发来的消息，同时更新UI
@@ -164,11 +153,6 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		// 跳转按钮
 		case R.id.bookBtn4:
 			a = 4;
-			setToolPop(a);
-			break;
-		case R.id.text_speak:
-			Log.i("hck", "text_speak");
-			a = 5;
 			setToolPop(a);
 			break;
 		// 夜间模式按钮
@@ -273,7 +257,6 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 		
 		mContext = getBaseContext();		
-		isStart = false;
 		WindowManager manage = getWindowManager();
 		Display display = manage.getDefaultDisplay();
 		screenWidth = display.getWidth();
@@ -297,8 +280,6 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		Intent intent = getIntent();
 		bookPath = intent.getStringExtra("path");
 		ccc = intent.getStringExtra("ccc");
-
-		
 
 		mPageWidget.setBitmaps(mCurPageBitmap, mCurPageBitmap);
 		mPageWidget.setOnTouchListener(new OnTouchListener() {
@@ -504,9 +485,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 			}
 			postInvalidateUI();
 			break;
-		case R.id.text_speak:
-		  
-			break;
+		
 		}
 	}
 
@@ -530,7 +509,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		bookBtn2 = (TextView) popupwindwow.findViewById(R.id.bookBtn2);
 		bookBtn3 = (TextView) popupwindwow.findViewById(R.id.bookBtn3);
 		bookBtn4 = (TextView) popupwindwow.findViewById(R.id.bookBtn4);
-		TextView button = (TextView) popupwindwow.findViewById(R.id.text_speak);
+	 
 		layout = (LinearLayout) popupwindwow.findViewById(R.id.book_pop);
 		getLight();
 		if (isNight) {
@@ -543,7 +522,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		bookBtn2.setOnClickListener(this);
 		bookBtn3.setOnClickListener(this);
 		bookBtn4.setOnClickListener(this);
-		button.setOnClickListener(this);
+	 
 	}
 
 	/**
@@ -582,21 +561,21 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 	private void setPop() {
 		popupwindwow = this.getLayoutInflater().inflate(R.layout.bookpop, null);
 		toolpop = this.getLayoutInflater().inflate(R.layout.toolpop, null);
-		mPopupWindow = new PopupWindow(popupwindwow, LayoutParams.FILL_PARENT,
+		mPopupWindow = new PopupWindow(popupwindwow, LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
-		mToolpop = new PopupWindow(toolpop, LayoutParams.FILL_PARENT,
+		mToolpop = new PopupWindow(toolpop, LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		toolpop1 = this.getLayoutInflater().inflate(R.layout.tool11, null);
-		mToolpop1 = new PopupWindow(toolpop1, LayoutParams.FILL_PARENT,
+		mToolpop1 = new PopupWindow(toolpop1, LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		toolpop2 = this.getLayoutInflater().inflate(R.layout.tool22, null);
-		mToolpop2 = new PopupWindow(toolpop2, LayoutParams.FILL_PARENT,
+		mToolpop2 = new PopupWindow(toolpop2, LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		toolpop3 = this.getLayoutInflater().inflate(R.layout.tool33, null);
-		mToolpop3 = new PopupWindow(toolpop3, LayoutParams.FILL_PARENT,
+		mToolpop3 = new PopupWindow(toolpop3, LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		toolpop4 = this.getLayoutInflater().inflate(R.layout.tool44, null);
-		mToolpop4 = new PopupWindow(toolpop4, LayoutParams.FILL_PARENT,
+		mToolpop4 = new PopupWindow(toolpop4, LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		playView = this.getLayoutInflater().inflate(R.layout.play_pop, null);
 		playpop = new PopupWindow(playView, LayoutParams.WRAP_CONTENT,
@@ -694,22 +673,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 					imageBtn4_1.setOnClickListener(this);
 					imageBtn4_2.setOnClickListener(this);
 				}
-				if (a == 5) {
-//					playpop.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
-//							screenWidth * 45 / 320);
-//					Button button = (Button) playView
-//							.findViewById(R.id.play_set);
-//					button3 = (Button) playView.findViewById(R.id.play_voice);
-//					button.setOnClickListener(this);
-//					button3.setOnClickListener(this);
-//					button3.setText("播放");
-					
-					 if (speekUtil==null) {
-							speekUtil=new SpeekUtil(this);
-						}
-					 Log.i("hck", "hhhh:"+words);
-						   speekUtil.start(words);
-				}
+		
 
 			}
 		} else {
@@ -785,13 +749,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 				imageBtn4_1.setOnClickListener(this);
 				imageBtn4_2.setOnClickListener(this);
 			}
-			if (a == 5) {
-				 if (speekUtil==null) {
-						speekUtil=new SpeekUtil(this);
-					}
-				 Log.i("hck", "rrrr:"+words);
-					   speekUtil.start(words);
-			}
+			
 		}
 		// 记录上次点击的是哪一个
 		b = a;
@@ -856,7 +814,6 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 			mPageWidget.doTouchEvent(e);
 
 	}
-	speekUtil.start(words);
 	Log.i("hck", "nest content2: "+words);
 	}
 
