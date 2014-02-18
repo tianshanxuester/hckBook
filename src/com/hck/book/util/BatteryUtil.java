@@ -25,7 +25,7 @@ public class BatteryUtil {
 					levelPercent =  level * 100 / scale + "%";
 				}
 			}
-		};
+	};
 		
 	/**
 	 * 得到电池电量百分比	

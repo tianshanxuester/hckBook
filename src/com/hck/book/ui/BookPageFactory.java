@@ -141,7 +141,7 @@ public class BookPageFactory {
 		
 		//显示当前时间
 		String currentTimeStr = getCurrentTime();
-		c.drawText(currentTimeStr, batteryLevelWidth+12+6, mHeight-5, bottomBarPaint);
+		c.drawText(currentTimeStr, batteryLevelWidth+12+16, mHeight-5, bottomBarPaint);
 	}
 	private String getCurrentTime(){
 		Date date = new Date(System.currentTimeMillis());
@@ -171,8 +171,7 @@ public class BookPageFactory {
 		if (begin >= 0) {
 			m_mbBufBegin = begin;
 			m_mbBufEnd = begin;
-		} else {
-		}
+		} 
 	}
 
 	/**
