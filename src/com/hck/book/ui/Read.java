@@ -68,12 +68,12 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 	private Bitmap mCurPageBitmap, mNextPageBitmap;
 	private MarkDialog mDialog = null;
 	private Context mContext = null;
-	private PageWidget mPageWidget;
+	private PageWidget pageWidget;
 	private PopupWindow mPopupWindow, mToolpop, mToolpop1, mToolpop2,
 			mToolpop3, mToolpop4, playpop;
 	protected int PAGE = 1;
 	private BookPageFactory pagefactory;
-	private View popupwindwow, toolpop, toolpop1, toolpop2, toolpop3, toolpop4,
+	private View popupwindwowView, toolpop, toolpop1View, toolpop2, toolpop3, toolpop4,
 			playView;
 	int screenHeight;
 	int readHeight; // 电子书显示高度
@@ -271,35 +271,35 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		mCurPageCanvas = new Canvas(mCurPageBitmap);
 		mNextPageCanvas = new Canvas(mNextPageBitmap);
 
-		mPageWidget = new PageWidget(this, screenWidth, readHeight);// 页面
+		pageWidget = new PageWidget(this, screenWidth, readHeight);// 页面
 		setContentView(R.layout.read);
 
 		RelativeLayout rlayout = (RelativeLayout) findViewById(R.id.readlayout);
-		rlayout.addView(mPageWidget);
+		rlayout.addView(pageWidget);
 
 		Intent intent = getIntent();
 		bookPath = intent.getStringExtra("path");
 		ccc = intent.getStringExtra("ccc");
 
-		mPageWidget.setBitmaps(mCurPageBitmap, mCurPageBitmap);
-		mPageWidget.setOnTouchListener(new OnTouchListener() {
+		pageWidget.setBitmaps(mCurPageBitmap, mCurPageBitmap);
+		pageWidget.setOnTouchListener(new OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent e) {
 				boolean ret = false;
 				
 
-				if (v == mPageWidget) {
+				if (v == pageWidget) {
 					if (!show) {
 
 						if (e.getAction() == MotionEvent.ACTION_DOWN) {
 							if (e.getY() > readHeight) {// 超出范围了，表示单击到广告条，则不做翻页
 								return false;
 							}
-							mPageWidget.abortAnimation();
-							mPageWidget.calcCornerXY(e.getX(), e.getY());
+							pageWidget.abortAnimation();
+							pageWidget.calcCornerXY(e.getX(), e.getY());
 							pagefactory.onDraw(mCurPageCanvas);
-							if (mPageWidget.DragToRight()) {// 左翻
+							if (pageWidget.DragToRight()) {// 左翻
 								try {
 									pagefactory.prePage();
 									begin = pagefactory.getM_mbBufBegin();// 获取当前阅读位置
@@ -328,11 +328,11 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 								}
 								pagefactory.onDraw(mNextPageCanvas);
 							}
-							mPageWidget.setBitmaps(mCurPageBitmap,
+							pageWidget.setBitmaps(mCurPageBitmap,
 									mNextPageBitmap);
 						}
 						editor.putInt(bookPath + "begin", begin).commit();
-						ret = mPageWidget.doTouchEvent(e);
+						ret = pageWidget.doTouchEvent(e);
 						return ret;
 					}
 				}
@@ -365,7 +365,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		begin = sp.getInt(bookPath + "begin", 0);
 		try {
 			pagefactory.openbook(bookPath, begin);// 从指定位置打开书籍，默认从开始打开
-			pagefactory.setM_fontSize(size);
+			pagefactory.setFontSize(size);
 			pagefactory.onDraw(mCurPageCanvas);
 
 		} catch (IOException e1) {
@@ -379,7 +379,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 	protected void onDestroy() {
 		super.onDestroy();
 		pagefactory = null;
-		mPageWidget = null;
+		pageWidget = null;
 		
 		finish();
 	}
@@ -452,7 +452,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		case R.id.seekBar1:
 			size = seekBar1.getProgress() + 15;
 			setSize();
-			pagefactory.setM_fontSize(size);
+			pagefactory.setFontSize(size);
 			pagefactory.setM_mbBufBegin(begin);
 			pagefactory.setM_mbBufEnd(begin);
 			postInvalidateUI();
@@ -504,13 +504,13 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 	 */
 	public void pop() {
 
-		mPopupWindow.showAtLocation(mPageWidget, Gravity.BOTTOM, 0, 0);
-		bookBtn1 = (TextView) popupwindwow.findViewById(R.id.bookBtn1);
-		bookBtn2 = (TextView) popupwindwow.findViewById(R.id.bookBtn2);
-		bookBtn3 = (TextView) popupwindwow.findViewById(R.id.bookBtn3);
-		bookBtn4 = (TextView) popupwindwow.findViewById(R.id.bookBtn4);
+		mPopupWindow.showAtLocation(pageWidget, Gravity.BOTTOM, 0, 0);
+		bookBtn1 = (TextView) popupwindwowView.findViewById(R.id.bookBtn1);
+		bookBtn2 = (TextView) popupwindwowView.findViewById(R.id.bookBtn2);
+		bookBtn3 = (TextView) popupwindwowView.findViewById(R.id.bookBtn3);
+		bookBtn4 = (TextView) popupwindwowView.findViewById(R.id.bookBtn4);
 	 
-		layout = (LinearLayout) popupwindwow.findViewById(R.id.book_pop);
+		layout = (LinearLayout) popupwindwowView.findViewById(R.id.book_pop);
 		getLight();
 		if (isNight) {
 			layout.setBackgroundResource(R.drawable.tmall_bar_bg);
@@ -559,15 +559,15 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 	 * 初始化所有POPUPWINDOW
 	 */
 	private void setPop() {
-		popupwindwow = this.getLayoutInflater().inflate(R.layout.bookpop, null);
-		toolpop = this.getLayoutInflater().inflate(R.layout.toolpop, null);
-		mPopupWindow = new PopupWindow(popupwindwow, LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		mToolpop = new PopupWindow(toolpop, LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		toolpop1 = this.getLayoutInflater().inflate(R.layout.tool11, null);
-		mToolpop1 = new PopupWindow(toolpop1, LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
+		popupwindwowView = this.getLayoutInflater().inflate(R.layout.bookpop, null);
+		mPopupWindow = new PopupWindow(popupwindwowView, LayoutParams.MATCH_PARENT,	LayoutParams.WRAP_CONTENT);
+		
+		toolpop = this.getLayoutInflater().inflate(R.layout.toolpop, null);		
+		mToolpop = new PopupWindow(toolpop, LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		
+		toolpop1View = this.getLayoutInflater().inflate(R.layout.tool11, null);
+		mToolpop1 = new PopupWindow(toolpop1View, LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		
 		toolpop2 = this.getLayoutInflater().inflate(R.layout.tool22, null);
 		mToolpop2 = new PopupWindow(toolpop2, LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
@@ -607,20 +607,20 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 			if (mToolpop.isShowing()) {
 				popDismiss();
 			} else {
-				mToolpop.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+				mToolpop.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 						screenWidth * 45 / 320);
 				// 当点击字体按钮
 				if (a == 1) {
-					mToolpop1.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+					mToolpop1.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 							screenWidth * 45 / 320);
-					seekBar1 = (SeekBar) toolpop1.findViewById(R.id.seekBar1);
+					seekBar1 = (SeekBar) toolpop1View.findViewById(R.id.seekBar1);
 					size = sp.getInt("size", 20);
 					seekBar1.setProgress((size - 15));
 					seekBar1.setOnSeekBarChangeListener(this);
 				}
 				// 当点击亮度按钮
 				if (a == 2) {
-					mToolpop2.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+					mToolpop2.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 							screenWidth * 45 / 320);
 					seekBar2 = (SeekBar) toolpop2.findViewById(R.id.seekBar2);
 					imageBtn2 = (ImageButton) toolpop2
@@ -641,7 +641,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 				}
 				// 当点击书签按钮
 				if (a == 3) {
-					mToolpop3.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+					mToolpop3.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 							toolpop.getHeight());
 					imageBtn3_1 = (ImageButton) toolpop3
 							.findViewById(R.id.imageBtn3_1);
@@ -652,7 +652,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 				}
 				// 当点击跳转按钮
 				if (a == 4) {
-					mToolpop4.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+					mToolpop4.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 							screenWidth * 45 / 320);
 					imageBtn4_1 = (ImageButton) toolpop4
 							.findViewById(R.id.imageBtn4_1);
@@ -681,20 +681,20 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 				// 对数据的记录
 				popDismiss();
 			}
-			mToolpop.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+			mToolpop.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 					screenWidth * 45 / 320);
 			// 点击字体按钮
 			if (a == 1) {
-				mToolpop1.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+				mToolpop1.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 						screenWidth * 45 / 320);
-				seekBar1 = (SeekBar) toolpop1.findViewById(R.id.seekBar1);
+				seekBar1 = (SeekBar) toolpop1View.findViewById(R.id.seekBar1);
 				size = sp.getInt("size", 20);
 				seekBar1.setProgress(size - 15);
 				seekBar1.setOnSeekBarChangeListener(this);
 			}
 			// 点击亮度按钮
 			if (a == 2) {
-				mToolpop2.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+				mToolpop2.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 						screenWidth * 45 / 320);
 				seekBar2 = (SeekBar) toolpop2.findViewById(R.id.seekBar2);
 				imageBtn2 = (ImageButton) toolpop2.findViewById(R.id.imageBtn2);
@@ -719,7 +719,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 			}
 			// 点击书签按钮
 			if (a == 3) {
-				mToolpop3.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+				mToolpop3.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 						screenWidth * 45 / 320);
 				imageBtn3_1 = (ImageButton) toolpop3
 						.findViewById(R.id.imageBtn3_1);
@@ -730,7 +730,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 			}
 			// 点击跳转按钮
 			if (a == 4) {
-				mToolpop4.showAtLocation(mPageWidget, Gravity.BOTTOM, 0,
+				mToolpop4.showAtLocation(pageWidget, Gravity.BOTTOM, 0,
 						screenWidth * 45 / 320);
 				imageBtn4_1 = (ImageButton) toolpop4
 						.findViewById(R.id.imageBtn4_1);
@@ -766,7 +766,7 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 	 * 刷新界面
 	 */
 	public void postInvalidateUI() {
-		mPageWidget.abortAnimation();
+		pageWidget.abortAnimation();
 		pagefactory.onDraw(mCurPageCanvas);
 		try {
 			pagefactory.currentPage();
@@ -778,21 +778,18 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 
 		pagefactory.onDraw(mNextPageCanvas);
 
-		mPageWidget.setBitmaps(mCurPageBitmap, mNextPageBitmap);
-		mPageWidget.postInvalidate();
+		pageWidget.setBitmaps(mCurPageBitmap, mNextPageBitmap);
+		pageWidget.postInvalidate();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-	}
-
-	
+	}	
 
 	public void nextPage() {
-		mPageWidget.abortAnimation();
-		mPageWidget.calcCornerXY(478, 459);
+		pageWidget.abortAnimation();
+		pageWidget.calcCornerXY(478, 459);
 		pagefactory.onDraw(mCurPageCanvas);
 		try {
 			pagefactory.nextPage();
@@ -807,11 +804,11 @@ public class Read extends Activity implements OnClickListener,	OnSeekBarChangeLi
 		} else {
 			pagefactory.onDraw(mNextPageCanvas);
 
-			mPageWidget.setBitmaps(mCurPageBitmap, mNextPageBitmap);
+			pageWidget.setBitmaps(mCurPageBitmap, mNextPageBitmap);
 			editor.putInt(bookPath + "begin", begin).commit();
 			MotionEvent e = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
 					427, 470, 1);
-			mPageWidget.doTouchEvent(e);
+			pageWidget.doTouchEvent(e);
 
 	}
 	Log.i("hck", "nest content2: "+words);

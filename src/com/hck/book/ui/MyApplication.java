@@ -6,12 +6,13 @@ import android.content.Context;
 import android.util.Log;
 
 import com.hck.book.helper.BookDB;
+import com.hck.book.util.BatteryUtil;
 
 public class MyApplication extends Application {
 	
 	public static BookDB bookDB;
 	private static Context context;
-	
+	public static BatteryUtil batteryUtil;
 	
 	
 	@Override
@@ -24,5 +25,6 @@ public class MyApplication extends Application {
 
 	private static void initDateBase() {
 		bookDB = new BookDB(context);	 
+		batteryUtil = new BatteryUtil(context);
 	}
 }

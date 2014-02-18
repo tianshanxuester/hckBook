@@ -14,7 +14,7 @@ import com.wxd.bookreader.manager.BookManager;
 import com.wxd.test.bookreader.adapter.ListFileAdapter;
 import com.wxd.test.bookreader.vo.ListFileItemVO;
 
-import android.annotation.SuppressLint;
+
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -38,7 +38,6 @@ import android.widget.Toast;
  * @author ÍõÐñ¶«
  *
  */
-@SuppressLint("DefaultLocale")
 public class TxtFileExplorerActivity extends DefaultActivity  {
 
 	ListView lv_fileList;
@@ -95,7 +94,7 @@ public class TxtFileExplorerActivity extends DefaultActivity  {
 	
 	private  class TxtFileFilter implements FileFilter{
 
-		@SuppressLint("DefaultLocale")
+		
 		@Override
 		public boolean accept(File file) {
 			

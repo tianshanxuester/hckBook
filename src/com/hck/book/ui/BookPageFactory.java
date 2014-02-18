@@ -7,7 +7,12 @@ import java.io.UnsupportedEncodingException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Vector;
+
+import com.hck.book.util.BatteryUtil;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -39,10 +44,13 @@ public class BookPageFactory {
 	private int mHeight;
 	private int mLineCount; // 每页可以显示的行数
 	private Paint mPaint;
+	private Paint bottomBarPaint;//页面底部的画笔
 
 	private float mVisibleHeight; // 绘制内容的宽
 	private float mVisibleWidth; // 绘制内容的宽
 	private int mWidth;
+	
+	private BatteryUtil batteryUtil = MyApplication.batteryUtil;
 
 	public BookPageFactory(int w, int h) {
 		mWidth = w;
@@ -54,6 +62,10 @@ public class BookPageFactory {
 		mVisibleWidth = mWidth - marginWidth * 2;
 		mVisibleHeight = mHeight - marginHeight * 2;
 		mLineCount = (int) (mVisibleHeight / m_fontSize) - 1; // 可显示的行数,-1是因为底部显示进度的位置容易被遮住
+		
+		bottomBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		bottomBarPaint.setTextSize(19);
+		bottomBarPaint.setColor(Color.BLACK);
 	}
 
 	public int getM_fontSize() {
@@ -114,12 +126,29 @@ public class BookPageFactory {
 			Read.words=word.toString();
 			word=null;
 		}
+		
+		//显示进度
 		float fPercent = (float) (m_mbBufBegin * 1.0 / m_mbBufLen);
 		DecimalFormat df = new DecimalFormat("#0.0");
 		String strPercent = df.format(fPercent * 100) + "%";
-		int nPercentWidth = (int) mPaint.measureText("999.9%") + 1;
-		c.drawText(strPercent, mWidth - nPercentWidth, mHeight - 5, mPaint);
+		int nPercentWidth = (int) bottomBarPaint.measureText("999.9%") + 1;
+		c.drawText(strPercent, mWidth - nPercentWidth, mHeight - 5, bottomBarPaint);
+		
+		//显示电池电量
+		String batteryLevel = "电量:"+batteryUtil.getBatteryLevelPercent();
+		int batteryLevelWidth = (int) bottomBarPaint.measureText(batteryLevel);
+		c.drawText(batteryLevel, 12, mHeight-5, bottomBarPaint);
+		
+		//显示当前时间
+		String currentTimeStr = getCurrentTime();
+		c.drawText(currentTimeStr, batteryLevelWidth+12+6, mHeight-5, bottomBarPaint);
 	}
+	private String getCurrentTime(){
+		Date date = new Date(System.currentTimeMillis());
+		return sdf.format(date);
+	}
+	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+	
 
 	/**
 	 * 
@@ -365,7 +394,7 @@ public class BookPageFactory {
 		m_book_bg = BG;
 	}
 
-	public void setM_fontSize(int m_fontSize) {
+	public void setFontSize(int m_fontSize) {
 		this.m_fontSize = m_fontSize;
 		mLineCount = (int) (mVisibleHeight / m_fontSize) - 1;
 	}
